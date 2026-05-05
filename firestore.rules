@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helpers
+    function isSignedIn() { return request.auth != null; }
+    function incoming() { return request.resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\\\-]+$'); }
+
+    // Validation Helpers
+    function isValidStaffingRequest(data) {
+      return data.keys().hasAll(['name', 'company', 'email', 'createdAt'])
+        && data.keys().size() <= 7
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 100
+        && data.company is string && data.company.size() >= 2 && data.company.size() <= 100
+        && data.email is string && data.email.size() >= 5 && data.email.size() <= 100
+        && data.createdAt == request.time
+        && (!('workersNeeded' in data) || (data.workersNeeded is int || data.workersNeeded is float))
+        && (!('sector' in data) || (data.sector is string && data.sector.size() <= 50))
+        && (!('requirements' in data) || (data.requirements is string && data.requirements.size() <= 1000));
+    }
+
+    function isValidJobApplication(data) {
+      return data.keys().hasAll(['fullName', 'email', 'phone', 'createdAt'])
+        && data.keys().size() <= 6
+        && data.fullName is string && data.fullName.size() >= 2 && data.fullName.size() <= 100
+        && data.email is string && data.email.size() >= 5 && data.email.size() <= 100
+        && data.phone is string && data.phone.size() >= 7 && data.phone.size() <= 20
+        && data.createdAt == request.time
+        && (!('experience' in data) || (data.experience is string && data.experience.size() <= 50))
+        && (!('availability' in data) || (data.availability is string && data.availability.size() <= 50));
+    }
+
+    function isValidContactInquiry(data) {
+      return data.keys().hasAll(['fullName', 'email', 'subject', 'message', 'createdAt'])
+        && data.keys().size() == 5
+        && data.fullName is string && data.fullName.size() >= 2 && data.fullName.size() <= 100
+        && data.email is string && data.email.size() >= 5 && data.email.size() <= 100
+        && data.subject is string && data.subject.size() >= 2 && data.subject.size() <= 200
+        && data.message is string && data.message.size() >= 10 && data.message.size() <= 2000
+        && data.createdAt == request.time;
+    }
+
+    // Collections
+    match /staffing-requests/{requestId} {
+      allow create: if isValidId(requestId) && isValidStaffingRequest(incoming());
+      // Admin only read/write would go here
+    }
+
+    match /job-applications/{applicationId} {
+      allow create: if isValidId(applicationId) && isValidJobApplication(incoming());
+    }
+
+    match /contact-inquiries/{inquiryId} {
+      allow create: if isValidId(inquiryId) && isValidContactInquiry(incoming());
+    }
+  }
+}

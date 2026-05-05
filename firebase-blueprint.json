@@ -1,0 +1,60 @@
+{
+  "entities": {
+    "StaffingRequest": {
+      "title": "Staffing Request",
+      "description": "Inquiry from employers looking for staff",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Employer name" },
+        "company": { "type": "string", "description": "Company name" },
+        "email": { "type": "string", "description": "Business email" },
+        "workersNeeded": { "type": "number", "description": "Number of workers required" },
+        "sector": { "type": "string", "description": "Industry sector (Warehouse, Cleaning, etc.)" },
+        "requirements": { "type": "string", "description": "Specific details or certifications" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Submission timestamp" }
+      },
+      "required": ["name", "company", "email", "createdAt"]
+    },
+    "JobApplication": {
+      "title": "Job Application",
+      "description": "Application from job seekers",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string", "description": "Applicant full name" },
+        "email": { "type": "string", "description": "Applicant email" },
+        "phone": { "type": "string", "description": "Applicant phone number" },
+        "experience": { "type": "string", "description": "Years of experience" },
+        "availability": { "type": "string", "description": "Shift availability" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Submission timestamp" }
+      },
+      "required": ["fullName", "email", "phone", "createdAt"]
+    },
+    "ContactInquiry": {
+      "title": "Contact Inquiry",
+      "description": "General message or inquiry",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string", "description": "Sender name" },
+        "email": { "type": "string", "description": "Sender email" },
+        "subject": { "type": "string", "description": "Message subject" },
+        "message": { "type": "string", "description": "Message content" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Submission timestamp" }
+      },
+      "required": ["fullName", "email", "subject", "message", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/staffing-requests/{requestId}": {
+      "schema": "StaffingRequest",
+      "description": "Collection of employer staffing inquiries"
+    },
+    "/job-applications/{applicationId}": {
+      "schema": "JobApplication",
+      "description": "Collection of job seeker applications"
+    },
+    "/contact-inquiries/{inquiryId}": {
+      "schema": "ContactInquiry",
+      "description": "Collection of general contact messages"
+    }
+  }
+}
